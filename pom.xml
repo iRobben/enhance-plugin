@@ -17,6 +17,8 @@
 
 	<modules>
 		<module>enhance-plugin-core</module>
+		<module>enhance-plugin-repository</module>
+		<module>enhance-plugin-web</module>
 	</modules>
 
 	<properties>

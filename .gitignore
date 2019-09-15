@@ -10,14 +10,14 @@ git*.classpath
 **/.eclipse
 **/target/
 **/test-output
-target/
 bin/
 .idea/
 *.iml
-.idea/**
-.idea
 logs/**
 log/
 mvn
 version
 /dubboregistry/
+.idea/**
+.gitignore
+.mvn/
