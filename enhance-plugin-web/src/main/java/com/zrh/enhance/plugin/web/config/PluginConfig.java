@@ -1,8 +1,8 @@
 package com.zrh.enhance.plugin.web.config;
 
-import com.zrh.enhancer.plugin.core.DefaultPluginFactory;
-import org.springframework.context.annotation.Bean;
+
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * @author zhangrenhua
@@ -12,10 +12,8 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
+@ImportResource(locations = "classpath:pluginConfig.xml")
 public class PluginConfig {
-    
-    @Bean
-    public DefaultPluginFactory initPluginFactory(){
-        return new DefaultPluginFactory();
-    }
+
+
 }

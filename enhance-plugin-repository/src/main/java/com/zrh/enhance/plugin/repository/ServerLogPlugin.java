@@ -13,6 +13,7 @@ import java.util.Arrays;
  */
 public class ServerLogPlugin implements MethodBeforeAdvice {
 
+	@Override
 	public void before(Method method, Object[] args, Object target) throws Throwable {
 		String result = String.format("%s.%s() 参数:%s", method.getDeclaringClass().getName(), method.getName(),
 				Arrays.toString(args));

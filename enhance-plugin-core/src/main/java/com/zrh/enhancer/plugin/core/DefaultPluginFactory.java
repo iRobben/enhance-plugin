@@ -2,6 +2,7 @@ package com.zrh.enhancer.plugin.core;
 
 import com.zrh.enhancer.plugin.exception.PluginOperateException;
 import org.aopalliance.aop.Advice;
+import org.aspectj.lang.JoinPoint;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
@@ -17,7 +18,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -64,6 +67,10 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
     static {
         BASE_DIR = System.getProperty("user.home") + "/.plugins/";
     }
+
+    public void doBefore(JoinPoint joinPoint) {
+
+    }
     
     
     @Override
@@ -73,7 +80,10 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         }
         //缓存插件信息
         String id = pluginDefinition.getId();
-        cachePluginDefinitionMap.putIfAbsent(id, pluginDefinition);
+        if(cachePluginDefinitionMap.get(id) == null ){
+            pluginDefinition.setIsActive(false);
+            cachePluginDefinitionMap.put(id, pluginDefinition);
+        }
         //下载远程插件,构建通知
         this.buildAdvice(pluginDefinition);
         //本地持久化
