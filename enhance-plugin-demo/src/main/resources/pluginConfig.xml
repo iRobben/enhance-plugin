@@ -6,12 +6,14 @@
          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<!-- 插件工厂配置 -->
-	<!--<bean id="pluginFactory" class="com.zrh.enhancer.plugin.core.DefaultPluginFactory" />
+	<bean id="pluginFactory" class="com.zrh.enhancer.plugin.core.DefaultPluginFactory" />
+	<bean class="com.zrh.enhance.plugin.client.ClientRegister">
+		<constructor-arg ref="pluginFactory"/>
+	</bean>
 	<aop:config>
 		<aop:aspect id="aspect" ref="pluginFactory">
-			<aop:pointcut id="point" expression="execution (* com.zrh.enhance.plugin.web.service.*.*(..))" />
+			<aop:pointcut id="point" expression="execution (* com.zrh.enhance.plugin.demo.service.*.*(..))" />
 			<aop:before method="doBefore" pointcut-ref="point" />
 		</aop:aspect>
 	</aop:config>
--->
 </beans>

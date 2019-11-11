@@ -36,7 +36,7 @@ public interface PluginFactory {
      * @param pluginId
      */
     void disablePlugin(String pluginId);
-    
+
     /**
      * 获取已安装插件
      * @return

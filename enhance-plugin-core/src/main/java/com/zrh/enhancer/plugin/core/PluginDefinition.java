@@ -29,5 +29,8 @@ public class PluginDefinition implements Serializable {
     
     /** 是否启用 */
     private Boolean isActive;
+
+    /** 应用名 */
+    private String applicationName;
     
 }

@@ -3,6 +3,7 @@ package com.zrh.enhancer.plugin.core;
 import com.zrh.enhancer.plugin.exception.PluginOperateException;
 import org.aopalliance.aop.Advice;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
@@ -10,24 +11,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
+import java.io.*;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/9/15
  */
 
-
+@Aspect
 public class DefaultPluginFactory implements ApplicationContextAware,InitializingBean,PluginFactory {
     
     private static final String BASE_DIR;
@@ -62,14 +51,15 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
      * @see PluginDefinition
      */
     private Map<String,Advice> cacheAdviceMap = new ConcurrentHashMap<>();
-    
-   
+
+
     static {
         BASE_DIR = System.getProperty("user.home") + "/.plugins/";
     }
 
-    public void doBefore(JoinPoint joinPoint) {
 
+    public void doBefore(JoinPoint joinPoint) {
+         //什么都不用做,只是为了后面在目标类上织入通知
     }
     
     
@@ -87,7 +77,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         //下载远程插件,构建通知
         this.buildAdvice(pluginDefinition);
         //本地持久化
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
     }
     
     /**
@@ -96,7 +86,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
      * @return
      */
     private String getLoadFileUrl(String jarRemoteUrl){
-       return BASE_DIR + jarRemoteUrl.substring(jarRemoteUrl.lastIndexOf("/"));
+        return BASE_DIR + jarRemoteUrl.substring(jarRemoteUrl.lastIndexOf("/"));
     }
     
     /**
@@ -110,7 +100,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         if(cacheAdviceMap.get(className) != null){
             return cacheAdviceMap.get(className);
         }
-        String jarRemoteUrl = pluginDefinition.getJarRemoteUrl();
+        String jarRemoteUrl = pluginDefinition.getJarRemoteUrl().replace("\\","/");
         File jarFile = new File(getLoadFileUrl(jarRemoteUrl));
         if(!jarFile.exists()){
             InputStream inputStream = null;
@@ -176,9 +166,9 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
     /**
      * 存储在本地
      */
-    private void localPersistence() {
+    private void localPersistence(String applicationName) {
         try {
-            File definitionFile = new File(BASE_DIR + LOCAL_STORE_FILE);
+            File definitionFile = new File(BASE_DIR + applicationName + "/" +  LOCAL_STORE_FILE);
             if(!definitionFile.exists()){
                 definitionFile.getParentFile().mkdirs();
                 definitionFile.createNewFile();
@@ -204,7 +194,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         //2.缓存中删除
         cachePluginDefinitionMap.remove(pluginDefinition.getId());
         //3.刷新本地存储
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
     }
     
     @Override
@@ -237,7 +227,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         
         //4. 更新状态，刷新本地存储
         pluginDefinition.setIsActive(true);
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
         
     
     }
@@ -277,7 +267,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         }
         //3. 更新状态，刷新本地存储
         pluginDefinition.setIsActive(false);
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
     }
     
     @Override
@@ -325,15 +315,20 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
             e.printStackTrace();
         }
     }
-    
+
+    private static final String KEY1 = "application_name";
+
+    private static final String KEY_CONFIG_FILE = "config";
     /**
      * 读取本地配置
      * @return
      */
     private Map<String,PluginDefinition> readerLocalDefinitions(){
+        ResourceBundle rb = ResourceBundle.getBundle(KEY_CONFIG_FILE, Locale.ENGLISH);
+        String applicationName = rb.getString(KEY1);
         FileInputStream fileInputStream = null;
         try {
-            File definitionFile = new File(BASE_DIR + LOCAL_STORE_FILE);
+            File definitionFile = new File(BASE_DIR + applicationName + "/" + LOCAL_STORE_FILE);
             if (!definitionFile.exists()) {
                 return null;
             }
