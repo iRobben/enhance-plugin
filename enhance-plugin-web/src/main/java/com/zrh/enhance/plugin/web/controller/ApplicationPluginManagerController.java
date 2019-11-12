@@ -2,6 +2,8 @@ package com.zrh.enhance.plugin.web.controller;
 
 import com.zrh.enhance.plugin.web.dao.ApplicationPluginManagerMapper;
 import com.zrh.enhance.plugin.web.dto.ApplicationPluginDTO;
+import com.zrh.enhance.plugin.web.model.ApplicationManager;
+import com.zrh.enhance.plugin.web.service.ApplicationManagerService;
 import com.zrh.enhance.plugin.web.service.ApplicationPluginManagerService;
 import com.zrh.enhancer.plugin.dto.CommonResult;
 import com.zrh.enhancer.plugin.dto.ResultCode;
@@ -32,6 +34,9 @@ public class ApplicationPluginManagerController {
     @Autowired
     private ApplicationPluginManagerService applicationPluginManagerService;
 
+    @Autowired
+    private ApplicationManagerService applicationManagerService;
+
     /**
      * 应用插件管理列表
      * @param model
@@ -40,6 +45,8 @@ public class ApplicationPluginManagerController {
     @GetMapping(value = "/applicationPluginList")
     public String applicationPluginList(Model model, @RequestParam Long applicationId){
         List<ApplicationPluginDTO> applicationPluginDTOList = applicationPluginManagerService.queryApplicationPluginList(applicationId);
+        ApplicationManager application = applicationManagerService.selectOne(applicationId);
+        model.addAttribute("app",application);
         model.addAttribute("list",applicationPluginDTOList);
         return "applicationPluginList";
     }

@@ -1,6 +1,8 @@
 package com.zrh.enhance.plugin.web.dto;
 
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,9 +12,14 @@ import java.util.Date;
  * @author zhangrh
  * @date 2019/11/11
  **/
+@Data
 public class ApplicationPluginDTO implements Serializable {
 
+    private Long pluginId;
+
     private String pluginName;
+
+    private Long applicationId;
 
     private String version;
 
@@ -23,4 +30,6 @@ public class ApplicationPluginDTO implements Serializable {
     private Integer activeStatus;
 
     private Date updateTime;
+
+
 }

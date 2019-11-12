@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script type="text/javascript" th:src="@{https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js}"></script>
+    <link th:href="@{https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/default.css}" rel="stylesheet"/>
+    <link rel="icon" th:href="@{/images/favicon.ico}" type="image/x-icon"/>
+    <meta charset="UTF-8"/>
+    <title>应用插件管理</title>
+</head>
+
+<body>
+<div class="contentDiv">
+
+      <b>当前应用:</b>
+        <label th:text="${app.applicationName}"></label>
+
+</div>
+
+<div class="contentDiv">
+    <table class="table table-hover table-condensed">
+        <legend>
+            <strong>已安装插件列表</strong>
+        </legend>
+        <thead>
+        <tr>
+            <th>插件名称</th>
+            <th>版本号</th>
+            <th>全类名</th>
+            <th>安装状态</th>
+            <th>激活状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${list}">
+            <td th:text="${p.pluginName}"></td>
+            <td th:text="${p.version}"></td>
+            <td th:text="${p.className}"></td>
+            <td th:text="${p.installStatus}? '已安装': '已卸载'"></td>
+            <td th:text="${p.activeStatus}? '已激活': '已禁用'"></td>
+            <td>
+                <a class="btn btn-info" th:if="${p.installStatus}" onclick="unInstall()" >卸载</a>
+                <a class="btn btn-info" th:if="!${p.activeStatus}" onclick="active()" >启用</a>
+                <a class="btn btn-info" th:if="${p.activeStatus}"  onclick="disable()">禁用</a>
+                <label id="applicationId" th:text="${p.applicationId}" hidden></label>
+                <label id="pluginId" th:text="${p.pluginId}" hidden></label>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a class="btn btn-info "  th:href="@{/pluginRepository(applicationId=${app.id})}">插件中心</a>
+</div>
+
+</body>
+</html>
+
+
+<script>
+    function unInstall() {
+        $.ajax({
+            url:"/unInstallPlugin",    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"applicationId":$("#applicationId").html().trim(),"pluginId":$("#pluginId").html().trim()},    //参数值
+            type:"GET",   //请求方式
+            beforeSend:function(){
+                //请求前的处理
+            },
+            success:function(req){
+                //请求成功时处理
+                alert(req.message);
+            },
+            complete:function(){
+                //请求完成的处理
+            },
+            error:function(){
+                //请求出错处理
+            }
+        });
+    }
+    function active() {
+        $.ajax({
+            url:"/activePlugin",    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"applicationId":$("#applicationId").html().trim(),"pluginId":$("#pluginId").html().trim()},    //参数值
+            type:"GET",   //请求方式
+            beforeSend:function(){
+                //请求前的处理
+            },
+            success:function(req){
+                //请求成功时处理
+                alert(req.message);
+            },
+            complete:function(){
+                //请求完成的处理
+            },
+            error:function(){
+                //请求出错处理
+            }
+        });
+
+    }
+
+    function disable() {
+        $.ajax({
+            url:"/disablePlugin",    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"applicationId":$("#applicationId").html().trim(),"pluginId":$("#pluginId").html().trim()},    //参数值
+            type:"GET",   //请求方式
+            beforeSend:function(){
+                //请求前的处理
+            },
+            success:function(req){
+                //请求成功时处理
+                alert(req.message);
+            },
+            complete:function(){
+                //请求完成的处理
+            },
+            error:function(){
+                //请求出错处理
+            }
+        });
+
+    }
+</script>

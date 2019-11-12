@@ -41,4 +41,8 @@ public class ApplicationManagerServiceImpl implements ApplicationManagerService 
         }
     }
 
+    @Override
+    public ApplicationManager selectOne(Long id) {
+        return applicationManagerMapper.selectByPrimaryKey(id);
+    }
 }

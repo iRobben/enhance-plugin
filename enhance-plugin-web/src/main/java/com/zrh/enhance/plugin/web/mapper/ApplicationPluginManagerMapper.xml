@@ -239,8 +239,10 @@
     where application_id = #{applicationId}
     and plugin_id = #{pluginId}
   </select>
-  <select id="selectApplicationPluginList" resultType=" com.zrh.enhance.plugin.web.dto.ApplicationPluginDTO" parameterType="long">
+  <select id="selectApplicationPluginList" resultType="com.zrh.enhance.plugin.web.dto.ApplicationPluginDTO" parameterType="long">
      SELECT
+    a.plugin_id as pluginId,
+    a.application_id as applicationId,
 	b.`name` AS pluginName,
 	b.version,
 	b.class_name AS className,

@@ -1,5 +1,7 @@
-package com.zrh.enhancer.plugin.core;
+package com.zrh.enhance.plugin.client;
 
+import com.zrh.enhancer.plugin.core.PluginDefinition;
+import com.zrh.enhancer.plugin.core.PluginFactory;
 import com.zrh.enhancer.plugin.exception.PluginOperateException;
 import org.aopalliance.aop.Advice;
 import org.aspectj.lang.JoinPoint;
@@ -16,7 +18,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,23 +33,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 public class DefaultPluginFactory implements ApplicationContextAware,InitializingBean,PluginFactory {
-    
+
     private static final String BASE_DIR;
-    
+
     private static final String LOCAL_STORE_FILE = "pluginDefinitions.obj";
-    
+
     /**
      * 应用上下文，类初始化后调用setApplicationContext
      */
     private ApplicationContext applicationContext;
-    
+
     /**
      * 缓存已经安装的插件定义组件信息
      * <id, PluginDefinition>
      * @see PluginDefinition
      */
     private Map<String,PluginDefinition> cachePluginDefinitionMap = new ConcurrentHashMap<>();
-    
+
     /**
      * 缓存已经实例化的通知类组件信息
      * <id, PluginDefinition>
@@ -52,11 +57,9 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
      */
     private Map<String,Advice> cacheAdviceMap = new ConcurrentHashMap<>();
 
-
     static {
         BASE_DIR = System.getProperty("user.home") + "/.plugins/";
     }
-
 
     public void doBefore(JoinPoint joinPoint) {
          //什么都不用做,只是为了后面在目标类上织入通知
@@ -316,19 +319,16 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         }
     }
 
-    private static final String KEY1 = "application_name";
 
-    private static final String KEY_CONFIG_FILE = "config";
+
     /**
      * 读取本地配置
      * @return
      */
     private Map<String,PluginDefinition> readerLocalDefinitions(){
-        ResourceBundle rb = ResourceBundle.getBundle(KEY_CONFIG_FILE, Locale.ENGLISH);
-        String applicationName = rb.getString(KEY1);
         FileInputStream fileInputStream = null;
         try {
-            File definitionFile = new File(BASE_DIR + applicationName + "/" + LOCAL_STORE_FILE);
+            File definitionFile = new File(BASE_DIR + ClientRegister.getApplicationName() + "/" + LOCAL_STORE_FILE);
             if (!definitionFile.exists()) {
                 return null;
             }

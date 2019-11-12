@@ -38,7 +38,7 @@ public class ApplicationManagerController {
     public String applicationList(Model model){
         List<ApplicationManager> applicationManagerList = applicationManagerService.selectList();
         model.addAttribute("list",applicationManagerList);
-        return "applicationListPage";
+        return "applicationList";
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)

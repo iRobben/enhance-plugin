@@ -17,4 +17,6 @@ public interface ApplicationManagerService {
 
     List<ApplicationManager> selectList();
 
+    ApplicationManager selectOne(Long id);
+
 }

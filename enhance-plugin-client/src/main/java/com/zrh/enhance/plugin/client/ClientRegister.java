@@ -14,9 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 /**
  * 客户端注册
@@ -26,28 +24,26 @@ public class ClientRegister {
 
     private static Logger logger = LoggerFactory.getLogger(ClientRegister.class);
 
-    private static final String KEY_CONFIG_FILE = "config";
+    private static final String KEY_CONFIG_FILE = "pluginConfig";
 
-    private static final String KEY1 = "application_name";
+    private static String applicationName;
 
-    private static final String KEY2 = "ep_registry";
+    private static String applicationHost;
 
-    private static final String KEY3 = "application_host";
+    private static String epRegistry;
 
-    public ClientRegister(PluginFactory pluginFactory) {
+    public ClientRegister(PluginFactory pluginFactory,String applicationName,String applicationHost,String epRegistry) {
         //获取配置文件属性
-        ResourceBundle rb = ResourceBundle.getBundle(KEY_CONFIG_FILE, Locale.ENGLISH);
+        ClientRegister.applicationName =  applicationName;
+        ClientRegister.applicationHost =  applicationHost;
+        ClientRegister.epRegistry =  epRegistry;
         try {
             //向管理平台注册应用信息
-            String applicationName = rb.getString(KEY1);
-            String epRegistry = rb.getString(KEY2);
-            String applicationHost = rb.getString(KEY3);
             InetAddress localhost = InetAddress.getLocalHost();
             Map<String, Object> paramMap = new HashMap<>(2);
             paramMap.put("applicationName", applicationName);
             paramMap.put("applicationIpAddress", localhost.getHostAddress() + ":" + applicationHost);
             HttpClientUtils.httpPostRequest(epRegistry, JSON.toJSONString(paramMap));
-
             //启动http服务
             HttpServer server = HttpServer.create(new InetSocketAddress(Integer.parseInt(applicationHost)), 0);
             server.createContext("/plugin/install", new PluginInstallHandler(pluginFactory));
@@ -60,4 +56,15 @@ public class ClientRegister {
         }
     }
 
+    public static String getApplicationName() {
+        return applicationName;
+    }
+
+    public static String getApplicationHost() {
+        return applicationHost;
+    }
+
+    public static String getEpRegistry() {
+        return epRegistry;
+    }
 }
