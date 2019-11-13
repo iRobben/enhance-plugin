@@ -1,8 +1,11 @@
-package com.zrh.enhancer.plugin.core;
+package com.zrh.enhance.plugin.client;
 
+import com.zrh.enhancer.plugin.core.PluginDefinition;
+import com.zrh.enhancer.plugin.core.PluginFactory;
 import com.zrh.enhancer.plugin.exception.PluginOperateException;
 import org.aopalliance.aop.Advice;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
@@ -10,17 +13,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
+import java.io.*;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -37,39 +31,38 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/9/15
  */
 
-
+@Aspect
 public class DefaultPluginFactory implements ApplicationContextAware,InitializingBean,PluginFactory {
-    
+
     private static final String BASE_DIR;
-    
+
     private static final String LOCAL_STORE_FILE = "pluginDefinitions.obj";
-    
+
     /**
      * 应用上下文，类初始化后调用setApplicationContext
      */
     private ApplicationContext applicationContext;
-    
+
     /**
      * 缓存已经安装的插件定义组件信息
      * <id, PluginDefinition>
      * @see PluginDefinition
      */
     private Map<String,PluginDefinition> cachePluginDefinitionMap = new ConcurrentHashMap<>();
-    
+
     /**
      * 缓存已经实例化的通知类组件信息
      * <id, PluginDefinition>
      * @see PluginDefinition
      */
     private Map<String,Advice> cacheAdviceMap = new ConcurrentHashMap<>();
-    
-   
+
     static {
         BASE_DIR = System.getProperty("user.home") + "/.plugins/";
     }
 
     public void doBefore(JoinPoint joinPoint) {
-
+         //什么都不用做,只是为了后面在目标类上织入通知
     }
     
     
@@ -87,7 +80,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         //下载远程插件,构建通知
         this.buildAdvice(pluginDefinition);
         //本地持久化
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
     }
     
     /**
@@ -96,7 +89,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
      * @return
      */
     private String getLoadFileUrl(String jarRemoteUrl){
-       return BASE_DIR + jarRemoteUrl.substring(jarRemoteUrl.lastIndexOf("/"));
+        return BASE_DIR + jarRemoteUrl.substring(jarRemoteUrl.lastIndexOf("/"));
     }
     
     /**
@@ -110,7 +103,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         if(cacheAdviceMap.get(className) != null){
             return cacheAdviceMap.get(className);
         }
-        String jarRemoteUrl = pluginDefinition.getJarRemoteUrl();
+        String jarRemoteUrl = pluginDefinition.getJarRemoteUrl().replace("\\","/");
         File jarFile = new File(getLoadFileUrl(jarRemoteUrl));
         if(!jarFile.exists()){
             InputStream inputStream = null;
@@ -176,9 +169,9 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
     /**
      * 存储在本地
      */
-    private void localPersistence() {
+    private void localPersistence(String applicationName) {
         try {
-            File definitionFile = new File(BASE_DIR + LOCAL_STORE_FILE);
+            File definitionFile = new File(BASE_DIR + applicationName + "/" +  LOCAL_STORE_FILE);
             if(!definitionFile.exists()){
                 definitionFile.getParentFile().mkdirs();
                 definitionFile.createNewFile();
@@ -204,7 +197,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         //2.缓存中删除
         cachePluginDefinitionMap.remove(pluginDefinition.getId());
         //3.刷新本地存储
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
     }
     
     @Override
@@ -237,7 +230,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         
         //4. 更新状态，刷新本地存储
         pluginDefinition.setIsActive(true);
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
         
     
     }
@@ -277,7 +270,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
         }
         //3. 更新状态，刷新本地存储
         pluginDefinition.setIsActive(false);
-        this.localPersistence();
+        this.localPersistence(pluginDefinition.getApplicationName());
     }
     
     @Override
@@ -325,7 +318,9 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
             e.printStackTrace();
         }
     }
-    
+
+
+
     /**
      * 读取本地配置
      * @return
@@ -333,7 +328,7 @@ public class DefaultPluginFactory implements ApplicationContextAware,Initializin
     private Map<String,PluginDefinition> readerLocalDefinitions(){
         FileInputStream fileInputStream = null;
         try {
-            File definitionFile = new File(BASE_DIR + LOCAL_STORE_FILE);
+            File definitionFile = new File(BASE_DIR + ClientRegister.getApplicationName() + "/" + LOCAL_STORE_FILE);
             if (!definitionFile.exists()) {
                 return null;
             }

@@ -7,7 +7,7 @@
     <link th:href="@{/css/default.css}" rel="stylesheet"/>
     <link rel="icon" th:href="@{/images/favicon.ico}" type="image/x-icon"/>
     <meta charset="UTF-8"/>
-    <title>我的插件中心</title>
+    <title>应用管理</title>
 </head>
 
 <body>
@@ -15,23 +15,22 @@
 <div class="contentDiv">
     <table class="table table-hover table-condensed">
         <legend>
-            <strong>已安装插件列表</strong>
+            <strong>应用列表</strong>
         </legend>
         <thead>
         <tr>
-            <th>插件名称</th>
-            <th>版本号</th>
-            <th>管理</th>
+            <th>应用名称</th>
+            <th>应用地址</th>
+            <th>应用状态</th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="plugin : ${list}">
-            <td th:text="${plugin.name}"></td>
-            <td th:text="${plugin.version}"></td>
-            <td>
-                <a class="btn btn-info" th:if="!${plugin.isActive}" th:href="@{/activePlugin(pluginId=${plugin.id})}">启用</a>
-                <a class="btn btn-info" th:if="${plugin.isActive}" th:href="@{/disablePlugin(pluginId=${plugin.id})}">禁用</a>
-            </td>
+        <tr th:each="app : ${list}">
+            <td th:text="${app.applicationName}"></td>
+            <td th:text="${app.applicationIpAddress}"></td>
+            <td th:text="running"></td>
+            <td><a class="btn btn-info" th:href="@{/applicationPluginList(applicationId=${app.id})}">查看</a></td>
         </tr>
         </tbody>
     </table>

@@ -20,13 +20,21 @@
         <thead>
         <tr>
             <th>插件名称</th>
-            <th>管理</th>
+            <th>版本号</th>
+            <th>全类名</th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="plugin : ${list}">
-            <td th:text="${plugin.pluginName}"></td>
-            <td><a class="btn btn-info" th:href="@{/installPlugin(url=${plugin.url})}">安装</a></td>
+            <td th:text="${plugin.name}"></td>
+            <td th:text="${plugin.version}"></td>
+            <td th:text="${plugin.className}"></td>
+            <td><a class="btn btn-info"  onclick="install()">安装</a>
+            <label id="applicationId" th:text="${applicationId}" hidden></label>
+            <label id="pluginId" th:text="${plugin.id}" hidden></label>
+            </td>
+
         </tr>
         </tbody>
     </table>
@@ -35,3 +43,29 @@
 
 </body>
 </html>
+
+<script>
+     function install() {
+         $.ajax({
+             url:"/installPlugin",    //请求的url地址
+             dataType:"json",   //返回格式为json
+             async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+             data:{"applicationId":$("#applicationId").html().trim(),"pluginId":$("#pluginId").html().trim()},    //参数值
+             type:"GET",   //请求方式
+             beforeSend:function(){
+                 //请求前的处理
+             },
+             success:function(req){
+                 //请求成功时处理
+                 alert(req.message);
+             },
+             complete:function(){
+                 //请求完成的处理
+             },
+             error:function(){
+                 //请求出错处理
+             }
+         });
+
+     }
+</script>
